@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>땅따먹기</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: #1b1f2a;
+      font-family: Arial;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+      color: white;
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    canvas {
+      border-radius: 12px;
+      border: 2px solid #2a2f4a;
+      background: #0f1117;
+    }
+
+    button {
+      padding: 10px 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 3px;
+    }
+
+    input {
+      width: 70px;
+      padding: 6px;
+      border-radius: 6px;
+      border: none;
+    }
+
+    #score {
+      width: 280px;
+      background: rgba(255,255,255,0.05);
+      padding: 15px;
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 12px;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+
+    .team {
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+    }
+
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+    }
+
+    .heart {
+      font-size: 16px;
+    }
+
+    .win {
+      background: #1f2a1f;
+      padding: 10px;
+      border-radius: 10px;
+      text-align: center;
+      margin-bottom: 10px;
+      font-weight: bold;
+      color: #7CFF7C;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="panel">
+
+  <div>
+    <button style="background:#ff5c7a;color:white;" onclick="setTeam('1')">1팀</button>
+    <button style="background:#4d96ff;color:white;" onclick="setTeam('2')">2팀</button>
+    <button style="background:#4caf70;color:white;" onclick="setTeam('3')">3팀</button>
+    <button style="background:#c7a6ff;color:white;" onclick="setTeam('4')">4팀</button>
+
+    <button style="background:#666;color:white;" onclick="undo()">되돌리기</button>
+    <button style="background:#333;color:white;" onclick="resetGame()">초기화</button>
+  </div>
+
+  <div>
+    🎯 목표 빙고:
+    <input id="targetBingo" type="number" value="3">
+  </div>
+
+  <canvas id="game" width="700" height="700"></canvas>
+</div>
+
+<div id="score"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB9lKJ45GF0wXmY2_q2-OL8JCqWo4yuL4E",
+  authDomain: "bingo-38d0d.firebaseapp.com",
+  databaseURL: "https://bingo-38d0d-default-rtdb.firebaseio.com",
+  projectId: "bingo-38d0d",
+  storageBucket: "bingo-38d0d.firebasestorage.app",
+  messagingSenderId: "654338820502",
+  appId: "1:654338820502:web:1da49e516005e0836335b7"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const SIZE = 10;
+const CELL = 70;
+
+const colors = {
+  "1": "#ff5c7a",
+  "2": "#4d96ff",
+  "3": "#4caf70",
+  "4": "#c7a6ff",
+  "0": "#151823"
+};
+
+let currentTeam = "1";
+let board = [];
+let score = {};
+let bingoScore = {};
+let targetBingo = 3;
+
+/* ================= 🔥 UNDO 핵심 ================= */
+let history = [];
+
+/* ================= INIT ================= */
+function initBoard() {
+  return Array.from({ length: SIZE }, (_, y) =>
+    Array.from({ length: SIZE }, (_, x) => ({
+      owner: "0",
+      num: y * SIZE + x + 1
+    }))
+  );
+}
+
+function setTeam(t){ currentTeam = t; }
+
+/* ================= CLICK ================= */
+canvas.addEventListener("click",(e)=>{
+  const x=Math.floor(e.offsetX/CELL);
+  const y=Math.floor(e.offsetY/CELL);
+
+  // 🔥 이전 상태 저장 (Undo용)
+  history.push(JSON.stringify(board));
+  if(history.length > 30) history.shift();
+
+  const cell=board[y][x];
+  cell.owner=(cell.owner===currentTeam)?"0":currentTeam;
+
+  db.ref("board").set(board);
+});
+
+/* ================= FIREBASE ================= */
+db.ref("board").on("value",snap=>{
+  board=snap.val()||initBoard();
+  updateScores();
+  render();
+  renderScore();
+});
+
+db.ref("targetBingo").on("value",snap=>{
+  targetBingo=snap.val()||3;
+  document.getElementById("targetBingo").value=targetBingo;
+});
+
+document.getElementById("targetBingo").addEventListener("input",e=>{
+  const v=Number(e.target.value);
+  targetBingo=v;
+  db.ref("targetBingo").set(v);
+});
+
+/* ================= SCORE ================= */
+function updateScores(){
+  score={1:0,2:0,3:0,4:0};
+  bingoScore={1:0,2:0,3:0,4:0};
+
+  for(let y=0;y<SIZE;y++){
+    for(let x=0;x<SIZE;x++){
+      const o=board[y][x].owner;
+      if(o!=="0") score[o]++;
+    }
+  }
+
+  ["1","2","3","4"].forEach(t=>{
+    bingoScore[t]=checkBingo(t);
+  });
+}
+
+function checkBingo(team){
+  let count=0;
+
+  for(let y=0;y<SIZE;y++)
+    if(board[y].every(c=>c.owner===team)) count++;
+
+  for(let x=0;x<SIZE;x++){
+    let ok=true;
+    for(let y=0;y<SIZE;y++)
+      if(board[y][x].owner!==team) ok=false;
+    if(ok) count++;
+  }
+
+  let d1=true,d2=true;
+  for(let i=0;i<SIZE;i++){
+    if(board[i][i].owner!==team) d1=false;
+    if(board[i][SIZE-1-i].owner!==team) d2=false;
+  }
+
+  if(d1) count++;
+  if(d2) count++;
+
+  return count;
+}
+
+/* ================= RENDER ================= */
+function render(){
+  ctx.clearRect(0,0,700,700);
+
+  for(let y=0;y<SIZE;y++){
+    for(let x=0;x<SIZE;x++){
+      const c=board[y][x];
+
+      ctx.fillStyle=colors[c.owner];
+      ctx.fillRect(x*CELL,y*CELL,CELL,CELL);
+
+      ctx.strokeStyle="#2a2f3a";
+      ctx.strokeRect(x*CELL,y*CELL,CELL,CELL);
+
+      ctx.fillStyle="#fff";
+      ctx.font="bold 20px Arial";
+      ctx.textAlign="center";
+      ctx.textBaseline="middle";
+      ctx.fillText(c.num,x*CELL+35,y*CELL+35);
+    }
+  }
+}
+
+/* ================= SCORE UI ================= */
+function renderScore(){
+
+  let win="";
+
+  for(let t of ["1","2","3","4"]){
+    if(bingoScore[t]>=targetBingo){
+      win=`<div class="win">🏆 ${t}팀 승리!</div>`;
+    }
+  }
+
+  document.getElementById("score").innerHTML=`
+    <div class="title">💖 SCORE BOARD 💖</div>
+
+    ${win}
+
+    <div class="team">
+      <div class="badge"><span class="heart">💗</span> 1팀</div>
+      <div>점령 ${score["1"]} / 빙고 ${bingoScore["1"]}</div>
+    </div>
+
+    <div class="team">
+      <div class="badge"><span class="heart">💙</span> 2팀</div>
+      <div>점령 ${score["2"]} / 빙고 ${bingoScore["2"]}</div>
+    </div>
+
+    <div class="team">
+      <div class="badge"><span class="heart">💚</span> 3팀</div>
+      <div>점령 ${score["3"]} / 빙고 ${bingoScore["3"]}</div>
+    </div>
+
+    <div class="team">
+      <div class="badge"><span class="heart">💜</span> 4팀</div>
+      <div>점령 ${score["4"]} / 빙고 ${bingoScore["4"]}</div>
+    </div>
+
+    <div style="text-align:center;margin-top:10px;opacity:0.8;">
+      🎯 목표 빙고: ${targetBingo}
+    </div>
+  `;
+}
+
+/* ================= 🔥 UNDO FUNCTION ================= */
+function undo(){
+  if(history.length === 0) return;
+
+  board = JSON.parse(history.pop());
+  db.ref("board").set(board);
+}
+
+/* ================= RESET ================= */
+function resetGame(){
+  board=initBoard();
+  db.ref("board").set(board);
+  history = []; // 초기화 시 히스토리도 삭제
+}
+
+board=initBoard();
+
+</script>
+
+</body>
+</html>
