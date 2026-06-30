@@ -4,94 +4,240 @@
   <title>땅따먹기</title>
 
   <style>
-    body {
-      margin: 0;
-      background: #1b1f2a;
-      font-family: Arial;
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      padding: 20px;
-      color: white;
-    }
+html,
+body {
+  background: #12151f !important;
+  min-height: 100vh;
+}
 
-    .panel {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+body {
+  margin: 0;
+  background: #12151f;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+  color: white;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
 
-    canvas {
-      border-radius: 12px;
-      border: 2px solid #2a2f4a;
-      background: #0f1117;
-    }
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
-    button {
-      padding: 10px 12px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      margin: 3px;
-    }
+canvas {
+  border-radius: 12px;
+  border: 2px solid #2a2f4a;
+  background: #0f1117;
+}
 
-    input {
-      width: 70px;
-      padding: 6px;
-      border-radius: 6px;
-      border: none;
-    }
+button {
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  margin: 3px;
+}
 
-    #score {
-      width: 280px;
-      background: rgba(255,255,255,0.05);
-      padding: 15px;
-      border-radius: 12px;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-      border: 1px solid rgba(255,255,255,0.08);
-    }
+input {
+  padding: 6px;
+  border-radius: 6px;
+  border: none;
+  font-weight: bold;
+}
 
-    .title {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 12px;
-      text-align: center;
-      letter-spacing: 2px;
-    }
+select {
+  border: none;
+  border-radius: 10px;
+  padding: 5px 12px;
+  font-weight: bold;
+  background: #dde7f1;
+  cursor: pointer;
+}
 
-    .team {
-      padding: 10px;
-      margin: 8px 0;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.05);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: bold;
-    }
+.hidden {
+  display: none !important;
+}
 
-    .badge {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 14px;
-    }
+#teamSetup {
+  width: 720px;
+  color: black;
+}
 
-    .heart {
-      font-size: 16px;
-    }
+.settingTable,
+.teamTable {
+  width: 100%;
+  border-collapse: collapse;
+  background: #f2f2f2;
+  color: black;
+  font-weight: bold;
+  text-align: center;
+  border: 2px solid black;
+}
 
-    .win {
-      background: #1f2a1f;
-      padding: 10px;
-      border-radius: 10px;
-      text-align: center;
-      margin-bottom: 10px;
-      font-weight: bold;
-      color: #7CFF7C;
-    }
+.settingTable th,
+.settingTable td {
+  border: 1px solid #777;
+  padding: 6px;
+  height: 28px;
+}
+
+.settingTable input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.teamTable {
+  margin-top: 28px;
+}
+
+.teamTable th {
+  border: 1px solid #555;
+  height: 28px;
+  font-size: 16px;
+}
+
+.teamTable td {
+  border: 1px dashed #999;
+  width: 25%;
+  height: 30px;
+  background: white;
+  outline: none;
+  font-size: 15px;
+}
+
+.t1 { background: #ffc7bd; }
+.t2 { background: #cfe2f3; }
+.t3 { background: #d9ead3; }
+.t4 { background: #fff2cc; }
+
+.manualBox {
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #1b1f2a;
+  color: white;
+  border: 1px solid #333a52;
+}
+
+.manualBox h3 {
+  margin: 12px 0 6px;
+}
+
+.manualBox input {
+  width: 145px;
+  margin: 4px;
+  background: #f2f2f2;
+  color: black;
+}
+
+.startBtn {
+  width: 100%;
+  background: #ff5c7a;
+  color: white;
+  font-size: 18px;
+  margin-top: 20px;
+  padding: 14px;
+  border-radius: 10px;
+}
+
+#teamResult {
+  margin-top: 18px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #1b1f2a;
+  color: white;
+  font-weight: bold;
+  line-height: 1.8;
+}
+
+#score {
+  width: 330px;
+  background: rgba(20, 24, 35, 0.95);
+  padding: 15px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  text-align: center;
+  letter-spacing: 2px;
+}
+
+.team {
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  gap: 10px;
+}
+
+.team small {
+  opacity: 0.85;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.win {
+  background: #1f2a1f;
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #7CFF7C;
+}
+
+.chickenBox {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+}
+
+.chickenTitle {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.chickenTeam {
+  margin: 10px 0;
+}
+
+.chickenTeamName {
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+
+.chickenGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+
+.chickenGrid input {
+  width: 52px;
+  padding: 4px;
+  text-align: center;
+  border-radius: 5px;
+  border: none;
+  font-size: 12px;
+}
   </style>
 </head>
 
@@ -99,31 +245,107 @@
 
 <div class="panel">
 
-  <div>
-    <button style="background:#ff5c7a;color:white;" onclick="setTeam('1')">1팀</button>
-    <button style="background:#4d96ff;color:white;" onclick="setTeam('2')">2팀</button>
-    <button style="background:#4caf70;color:white;" onclick="setTeam('3')">3팀</button>
-    <button style="background:#c7a6ff;color:white;" onclick="setTeam('4')">4팀</button>
+  <div id="teamSetup">
 
-    <button style="background:#666;color:white;" onclick="undo()">되돌리기</button>
-    <button style="background:#333;color:white;" onclick="resetGame()">초기화</button>
+    <table class="settingTable">
+      <tr>
+        <th>팀 배정 방식</th>
+        <td>
+          <select id="teamMode" onchange="changeMode()">
+            <option value="balance">밸런스</option>
+            <option value="random">랜덤</option>
+            <option value="manual">수동</option>
+          </select>
+        </td>
+        <th>초기화</th>
+        <td><input type="checkbox" onclick="clearTeamTable(this)"></td>
+      </tr>
+      <tr>
+        <th>팀 인원수</th>
+        <td>4</td>
+        <th>팀짜기</th>
+        <td><input type="checkbox" onclick="makeTeams(this)"></td>
+      </tr>
+    </table>
+
+    <table class="teamTable">
+      <tr>
+        <th class="t1">1티어</th>
+        <th class="t2">2티어</th>
+        <th class="t3">3티어</th>
+        <th class="t4">4티어</th>
+      </tr>
+
+      <tr><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+      <tr><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+      <tr><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+      <tr><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+      <tr><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+      <tr><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+      <tr><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+      <tr><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td></tr>
+    </table>
+
+    <div id="manualTeams" class="manualBox hidden">
+      <h3>💗 1팀 직접 입력</h3>
+      <input id="m11" placeholder="1팀 1번">
+      <input id="m12" placeholder="1팀 2번">
+      <input id="m13" placeholder="1팀 3번">
+      <input id="m14" placeholder="1팀 4번">
+
+      <h3>💙 2팀 직접 입력</h3>
+      <input id="m21" placeholder="2팀 1번">
+      <input id="m22" placeholder="2팀 2번">
+      <input id="m23" placeholder="2팀 3번">
+      <input id="m24" placeholder="2팀 4번">
+
+      <h3>💚 3팀 직접 입력</h3>
+      <input id="m31" placeholder="3팀 1번">
+      <input id="m32" placeholder="3팀 2번">
+      <input id="m33" placeholder="3팀 3번">
+      <input id="m34" placeholder="3팀 4번">
+
+      <h3>💜 4팀 직접 입력</h3>
+      <input id="m41" placeholder="4팀 1번">
+      <input id="m42" placeholder="4팀 2번">
+      <input id="m43" placeholder="4팀 3번">
+      <input id="m44" placeholder="4팀 4번">
+    </div>
+
+    <div id="teamResult"></div>
+
+    <button class="startBtn" onclick="startGame()">게임스타트</button>
+
   </div>
 
-  <div>
-    🎯 목표 빙고:
-    <input id="targetBingo" type="number" value="3">
+  <div id="gameArea" class="hidden">
+
+    <div>
+      <button style="background:#ff5c7a;color:white;" onclick="setTeam('1')">1팀</button>
+      <button style="background:#4d96ff;color:white;" onclick="setTeam('2')">2팀</button>
+      <button style="background:#4caf70;color:white;" onclick="setTeam('3')">3팀</button>
+      <button style="background:#c7a6ff;color:white;" onclick="setTeam('4')">4팀</button>
+
+      <button style="background:#666;color:white;" onclick="undo()">되돌리기</button>
+      <button style="background:#333;color:white;" onclick="resetGame()">초기화</button>
+    </div>
+
+    <div style="color:white;font-weight:bold;">
+      🎯 목표 빙고:
+      <input id="targetBingo" type="number" value="3" style="width:70px;">
+    </div>
+
+    <canvas id="game" width="700" height="700"></canvas>
   </div>
 
-  <canvas id="game" width="700" height="700"></canvas>
 </div>
 
-<div id="score"></div>
+<div id="score" class="hidden"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <script>
-
 const firebaseConfig = {
   apiKey: "AIzaSyB9lKJ45GF0wXmY2_q2-OL8JCqWo4yuL4E",
   authDomain: "bingo-38d0d.firebaseapp.com",
@@ -142,6 +364,7 @@ const ctx = canvas.getContext("2d");
 
 const SIZE = 10;
 const CELL = 70;
+const TEAM_SIZE = 4;
 
 const colors = {
   "1": "#ff5c7a",
@@ -153,183 +376,457 @@ const colors = {
 
 let currentTeam = "1";
 let board = [];
-let score = {};
-let bingoScore = {};
+let score = {1:0,2:0,3:0,4:0};
+let bingoScore = {1:0,2:0,3:0,4:0};
 let targetBingo = 3;
-
-/* ================= 🔥 UNDO 핵심 ================= */
 let history = [];
 
-/* ================= INIT ================= */
+let teams = {
+  "1": [],
+  "2": [],
+  "3": [],
+  "4": []
+};
+
+let chickenScores = {
+  "1": Array(10).fill(""),
+  "2": Array(10).fill(""),
+  "3": Array(10).fill(""),
+  "4": Array(10).fill("")
+};
+
+let lockMode = {
+  "1": false,
+  "2": false,
+  "3": false,
+  "4": false
+};
+
 function initBoard() {
   return Array.from({ length: SIZE }, (_, y) =>
     Array.from({ length: SIZE }, (_, x) => ({
       owner: "0",
-      num: y * SIZE + x + 1
+      num: y * SIZE + x + 1,
+      locked: false
     }))
   );
 }
 
-function setTeam(t){ currentTeam = t; }
+function setTeam(t) {
+  currentTeam = t;
+}
 
-/* ================= CLICK ================= */
-canvas.addEventListener("click",(e)=>{
-  const x=Math.floor(e.offsetX/CELL);
-  const y=Math.floor(e.offsetY/CELL);
+function changeMode() {
+  const mode = document.getElementById("teamMode").value;
+  document.getElementById("manualTeams").classList.toggle("hidden", mode !== "manual");
+}
 
-  // 🔥 이전 상태 저장 (Undo용)
+function getTierPlayers() {
+  const rows = document.querySelectorAll(".teamTable tr");
+  const tiers = [[], [], [], []];
+
+  for (let r = 1; r < rows.length; r++) {
+    const cells = rows[r].querySelectorAll("td");
+
+    cells.forEach((cell, index) => {
+      const name = cell.innerText.trim();
+      if (name !== "") {
+        tiers[index].push(name);
+      }
+    });
+  }
+
+  return tiers;
+}
+
+function shuffle(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function getManualTeams() {
+  teams = {
+    "1": [m11.value, m12.value, m13.value, m14.value].map(v => v.trim()).filter(Boolean),
+    "2": [m21.value, m22.value, m23.value, m24.value].map(v => v.trim()).filter(Boolean),
+    "3": [m31.value, m32.value, m33.value, m34.value].map(v => v.trim()).filter(Boolean),
+    "4": [m41.value, m42.value, m43.value, m44.value].map(v => v.trim()).filter(Boolean)
+  };
+}
+
+function makeTeams(checkBox) {
+  if (checkBox) {
+    setTimeout(() => checkBox.checked = false, 300);
+  }
+
+  const mode = document.getElementById("teamMode").value;
+
+  teams = {
+    "1": [],
+    "2": [],
+    "3": [],
+    "4": []
+  };
+
+  if (mode === "manual") {
+    getManualTeams();
+    renderTeamResult();
+    db.ref("teams").set(teams);
+    return;
+  }
+
+  const tiers = getTierPlayers();
+
+  if (mode === "balance") {
+    tiers.forEach(tier => {
+      const shuffled = shuffle(tier);
+
+      shuffled.forEach((name, i) => {
+        const teamNumber = String((i % 4) + 1);
+
+        if (teams[teamNumber].length < TEAM_SIZE) {
+          teams[teamNumber].push(name);
+        }
+      });
+    });
+  } else {
+    const allPlayers = shuffle(tiers.flat());
+
+    allPlayers.forEach(name => {
+      let target = ["1","2","3","4"].find(t => teams[t].length < TEAM_SIZE);
+      if (target) teams[target].push(name);
+    });
+  }
+
+  renderTeamResult();
+  db.ref("teams").set(teams);
+}
+
+function renderTeamResult() {
+  document.getElementById("teamResult").innerHTML = `
+    💗 1팀: ${teams["1"].join(", ") || "없음"}<br>
+    💙 2팀: ${teams["2"].join(", ") || "없음"}<br>
+    💚 3팀: ${teams["3"].join(", ") || "없음"}<br>
+    💜 4팀: ${teams["4"].join(", ") || "없음"}
+  `;
+}
+
+function clearTeamTable(checkBox) {
+  if (checkBox) {
+    setTimeout(() => checkBox.checked = false, 300);
+  }
+
+  document.querySelectorAll(".teamTable td").forEach(td => {
+    td.innerText = "";
+  });
+
+  document.querySelectorAll("#manualTeams input").forEach(input => {
+    input.value = "";
+  });
+
+  teams = {
+    "1": [],
+    "2": [],
+    "3": [],
+    "4": []
+  };
+
+  document.getElementById("teamResult").innerHTML = "";
+  db.ref("teams").set(teams);
+}
+
+function startGame() {
+  makeTeams();
+  db.ref("gameStarted").set(true);
+}
+
+db.ref("gameStarted").on("value", snap => {
+  const started = snap.val();
+
+  if (started) {
+    document.getElementById("teamSetup").classList.add("hidden");
+    document.getElementById("gameArea").classList.remove("hidden");
+    document.getElementById("score").classList.remove("hidden");
+    render();
+    renderScore();
+  } else {
+    document.getElementById("teamSetup").classList.remove("hidden");
+    document.getElementById("gameArea").classList.add("hidden");
+    document.getElementById("score").classList.add("hidden");
+  }
+});
+
+db.ref("teams").on("value", snap => {
+  teams = snap.val() || teams;
+  renderTeamResult();
+  renderScore();
+});
+
+db.ref("chicken").on("value", snap => {
+  chickenScores = snap.val() || chickenScores;
+  renderScore();
+});
+
+canvas.addEventListener("click", (e) => {
+  const x = Math.floor(e.offsetX / CELL);
+  const y = Math.floor(e.offsetY / CELL);
+
+  if (!board[y] || !board[y][x]) return;
+
+  const cell = board[y][x];
+
+  if (cell.locked) return;
+
   history.push(JSON.stringify(board));
-  if(history.length > 30) history.shift();
+  if (history.length > 30) history.shift();
 
-  const cell=board[y][x];
-  cell.owner=(cell.owner===currentTeam)?"0":currentTeam;
+  if (lockMode[currentTeam]) {
+    cell.owner = currentTeam;
+    cell.locked = true;
+  } else {
+    cell.owner = (cell.owner === currentTeam) ? "0" : currentTeam;
+    cell.locked = false;
+  }
 
   db.ref("board").set(board);
 });
 
-/* ================= FIREBASE ================= */
-db.ref("board").on("value",snap=>{
-  board=snap.val()||initBoard();
+db.ref("board").on("value", snap => {
+  board = snap.val() || initBoard();
   updateScores();
   render();
   renderScore();
 });
 
-db.ref("targetBingo").on("value",snap=>{
-  targetBingo=snap.val()||3;
-  document.getElementById("targetBingo").value=targetBingo;
+db.ref("targetBingo").on("value", snap => {
+  targetBingo = snap.val() || 3;
+  document.getElementById("targetBingo").value = targetBingo;
 });
 
-document.getElementById("targetBingo").addEventListener("input",e=>{
-  const v=Number(e.target.value);
-  targetBingo=v;
+document.getElementById("targetBingo").addEventListener("input", e => {
+  const v = Number(e.target.value);
+  targetBingo = v;
   db.ref("targetBingo").set(v);
 });
 
-/* ================= SCORE ================= */
-function updateScores(){
-  score={1:0,2:0,3:0,4:0};
-  bingoScore={1:0,2:0,3:0,4:0};
+function updateScores() {
+  score = {1:0,2:0,3:0,4:0};
+  bingoScore = {1:0,2:0,3:0,4:0};
 
-  for(let y=0;y<SIZE;y++){
-    for(let x=0;x<SIZE;x++){
-      const o=board[y][x].owner;
-      if(o!=="0") score[o]++;
+  for (let y = 0; y < SIZE; y++) {
+    for (let x = 0; x < SIZE; x++) {
+      const o = board[y][x].owner;
+      if (o !== "0") score[o]++;
     }
   }
 
-  ["1","2","3","4"].forEach(t=>{
-    bingoScore[t]=checkBingo(t);
+  ["1","2","3","4"].forEach(t => {
+    bingoScore[t] = checkBingo(t);
   });
 }
 
-function checkBingo(team){
-  let count=0;
+function checkBingo(team) {
+  let count = 0;
 
-  for(let y=0;y<SIZE;y++)
-    if(board[y].every(c=>c.owner===team)) count++;
-
-  for(let x=0;x<SIZE;x++){
-    let ok=true;
-    for(let y=0;y<SIZE;y++)
-      if(board[y][x].owner!==team) ok=false;
-    if(ok) count++;
+  for (let y = 0; y < SIZE; y++) {
+    if (board[y].every(c => c.owner === team)) count++;
   }
 
-  let d1=true,d2=true;
-  for(let i=0;i<SIZE;i++){
-    if(board[i][i].owner!==team) d1=false;
-    if(board[i][SIZE-1-i].owner!==team) d2=false;
+  for (let x = 0; x < SIZE; x++) {
+    let ok = true;
+
+    for (let y = 0; y < SIZE; y++) {
+      if (board[y][x].owner !== team) ok = false;
+    }
+
+    if (ok) count++;
   }
 
-  if(d1) count++;
-  if(d2) count++;
+  let d1 = true;
+  let d2 = true;
+
+  for (let i = 0; i < SIZE; i++) {
+    if (board[i][i].owner !== team) d1 = false;
+    if (board[i][SIZE - 1 - i].owner !== team) d2 = false;
+  }
+
+  if (d1) count++;
+  if (d2) count++;
 
   return count;
 }
 
-/* ================= RENDER ================= */
-function render(){
-  ctx.clearRect(0,0,700,700);
+function render() {
+  ctx.clearRect(0, 0, 700, 700);
 
-  for(let y=0;y<SIZE;y++){
-    for(let x=0;x<SIZE;x++){
-      const c=board[y][x];
+  for (let y = 0; y < SIZE; y++) {
+    for (let x = 0; x < SIZE; x++) {
+      const c = board[y][x];
 
-      ctx.fillStyle=colors[c.owner];
-      ctx.fillRect(x*CELL,y*CELL,CELL,CELL);
+      ctx.fillStyle = colors[c.owner];
+      ctx.fillRect(x * CELL, y * CELL, CELL, CELL);
 
-      ctx.strokeStyle="#2a2f3a";
-      ctx.strokeRect(x*CELL,y*CELL,CELL,CELL);
+      ctx.strokeStyle = "#2a2f3a";
+      ctx.strokeRect(x * CELL, y * CELL, CELL, CELL);
 
-      ctx.fillStyle="#fff";
-      ctx.font="bold 20px Arial";
-      ctx.textAlign="center";
-      ctx.textBaseline="middle";
-      ctx.fillText(c.num,x*CELL+35,y*CELL+35);
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 20px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(c.num, x * CELL + 35, y * CELL + 35);
+
+      // 🔒 고정된 칸 표시
+      if (c.locked) {
+        ctx.fillStyle = "#FFD700";
+        ctx.font = "bold 18px Arial";
+        ctx.fillText("🔒", x * CELL + 55, y * CELL + 15);
+      }
     }
   }
 }
 
-/* ================= SCORE UI ================= */
-function renderScore(){
 
-  let win="";
+function teamNames(t) {
+  if (!teams[t] || teams[t].length === 0) return "멤버 없음";
+  return teams[t].join(", ");
+}
 
-  for(let t of ["1","2","3","4"]){
-    if(bingoScore[t]>=targetBingo){
-      win=`<div class="win">🏆 ${t}팀 승리!</div>`;
+function saveChicken(team, index, value) {
+  chickenScores[team][index] = value;
+  db.ref("chicken").set(chickenScores);
+}
+
+function renderChickenInputs(team) {
+  const emoji = {
+    "1": "💗",
+    "2": "💙",
+    "3": "💚",
+    "4": "💜"
+  };
+
+  let html = `
+    <div class="chickenTeam">
+      <div class="chickenTeamName">
+  ${emoji[team]} ${team}팀
+  <label style="font-size:11px;margin-left:6px;">
+    <input
+      type="checkbox"
+      ${lockMode[team] ? "checked" : ""}
+      onchange="setLockMode('${team}', this.checked)"
+    >
+    🔒고정
+  </label>
+</div>
+      <div class="chickenGrid">
+  `;
+
+  for (let i = 0; i < 10; i++) {
+    html += `
+      <input
+  type="text"
+  maxlength="3"
+  value="${chickenScores[team]?.[i] || ""}"
+  placeholder="${i + 1}"
+  onchange="
+  this.value=this.value.replace(/[^0-9]/g,'').slice(0,3);
+  saveChicken('${team}', ${i}, this.value);
+"
+>
+    `;
+  }
+
+  html += `
+      </div>
+    </div>
+  `;
+
+  return html;
+}
+
+function renderScore() {
+  let win = "";
+
+  for (let t of ["1","2","3","4"]) {
+    if (bingoScore[t] >= targetBingo) {
+      win = `<div class="win">🏆 ${t}팀 승리!</div>`;
     }
   }
 
-  document.getElementById("score").innerHTML=`
+  document.getElementById("score").innerHTML = `
     <div class="title">💖 SCORE BOARD 💖</div>
 
     ${win}
 
     <div class="team">
-      <div class="badge"><span class="heart">💗</span> 1팀</div>
-      <div>점령 ${score["1"]} / 빙고 ${bingoScore["1"]}</div>
-    </div>
+  <div>💗 1팀<br><small>${teamNames("1")}</small></div>
+  <div>
+    점령 ${score["1"]} / 빙고 ${bingoScore["1"]}<br>
+  </div>
+</div>
 
-    <div class="team">
-      <div class="badge"><span class="heart">💙</span> 2팀</div>
-      <div>점령 ${score["2"]} / 빙고 ${bingoScore["2"]}</div>
-    </div>
+<div class="team">
+  <div>💙 2팀<br><small>${teamNames("2")}</small></div>
+  <div>
+    점령 ${score["2"]} / 빙고 ${bingoScore["2"]}<br>
+  </div>
+</div>
 
-    <div class="team">
-      <div class="badge"><span class="heart">💚</span> 3팀</div>
-      <div>점령 ${score["3"]} / 빙고 ${bingoScore["3"]}</div>
-    </div>
+<div class="team">
+  <div>💚 3팀<br><small>${teamNames("3")}</small></div>
+  <div>
+    점령 ${score["3"]} / 빙고 ${bingoScore["3"]}<br>
+  </div>
+</div>
 
-    <div class="team">
-      <div class="badge"><span class="heart">💜</span> 4팀</div>
-      <div>점령 ${score["4"]} / 빙고 ${bingoScore["4"]}</div>
-    </div>
+<div class="team">
+  <div>💜 4팀<br><small>${teamNames("4")}</small></div>
+  <div>
+    점령 ${score["4"]} / 빙고 ${bingoScore["4"]}<br>
+  </div>
+</div>
 
     <div style="text-align:center;margin-top:10px;opacity:0.8;">
       🎯 목표 빙고: ${targetBingo}
     </div>
+
+    <div class="chickenBox">
+      <div class="chickenTitle">🍗 치킨</div>
+
+      ${renderChickenInputs("1")}
+      ${renderChickenInputs("2")}
+      ${renderChickenInputs("3")}
+      ${renderChickenInputs("4")}
+    </div>
   `;
 }
 
-/* ================= 🔥 UNDO FUNCTION ================= */
-function undo(){
-  if(history.length === 0) return;
+function undo() {
+  if (history.length === 0) return;
 
   board = JSON.parse(history.pop());
   db.ref("board").set(board);
 }
 
-/* ================= RESET ================= */
-function resetGame(){
-  board=initBoard();
+function resetGame() {
+  board = initBoard();
+  history = [];
+
+  chickenScores = {
+    "1": Array(10).fill(""),
+    "2": Array(10).fill(""),
+    "3": Array(10).fill(""),
+    "4": Array(10).fill("")
+  };
+
   db.ref("board").set(board);
-  history = []; // 초기화 시 히스토리도 삭제
+  db.ref("chicken").set(chickenScores);
+  db.ref("gameStarted").set(false);
 }
 
-board=initBoard();
+function setLockMode(team, checked) {
+  lockMode[team] = checked;
+}
 
+board = initBoard();
+changeMode();
 </script>
 
 </body>
