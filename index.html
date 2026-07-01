@@ -262,7 +262,12 @@ select {
       </tr>
       <tr>
         <th>팀 인원수</th>
-        <td>4</td>
+<td>
+  <select id="teamSize">
+    <option value="3">3명</option>
+    <option value="4" selected>4명</option>
+  </select>
+</td>
         <th>팀짜기</th>
         <td><input type="checkbox" onclick="makeTeams(this)"></td>
       </tr>
@@ -364,7 +369,6 @@ const ctx = canvas.getContext("2d");
 
 const SIZE = 10;
 const CELL = 70;
-const TEAM_SIZE = 4;
 
 const colors = {
   "1": "#ff5c7a",
@@ -439,7 +443,10 @@ function autoPickCaptainsByPlayerCount() {
 
   const tiers = getTierPlayers();
   const playerCount = tiers.flat().length;
-  const teamCount = Math.ceil(playerCount / TEAM_SIZE);
+  const teamSize = getTeamSize();
+
+const teamCount =
+  Math.ceil(playerCount / teamSize);
 
   // 필요한 팀장 수만큼 인원이 되는 티어만 후보로 고름
   const possibleTiers = tiers.filter(tier => tier.length >= teamCount);
@@ -491,8 +498,9 @@ function getManualTeams() {
     "4": [m41.value, m42.value, m43.value, m44.value].map(v => v.trim()).filter(Boolean)
   };
 }
-
 function makeTeams(checkBox) {
+  const TEAM_SIZE = getTeamSize();
+
   if (checkBox) {
     setTimeout(() => checkBox.checked = false, 300);
   }
@@ -523,6 +531,59 @@ function makeTeams(checkBox) {
         const teamNumber = String((i % 4) + 1);
 
         if (teams[teamNumber].length < TEAM_SIZE) {
+          teams[teamNumber].push(name);
+        }
+      });
+    });
+  } else {
+    const allPlayers = shuffle(tiers.flat());
+
+    allPlayers.forEach(name => {
+      let target = ["1","2","3","4"].find(t => teams[t].length < TEAM_SIZE);
+      if (target) teams[target].push(name);
+    });
+  }
+
+  renderTeamResult();
+  db.ref("teams").set(teams);
+}
+
+function makeTeams(checkBox) {
+
+const TEAM_SIZE = getTeamSize(); 
+
+ if (checkBox) {
+    setTimeout(() => checkBox.checked = false, 300);
+  }
+
+  const mode = document.getElementById("teamMode").value;
+
+  teams = {
+    "1": [],
+    "2": [],
+    "3": [],
+    "4": []
+  };
+
+  if (mode === "manual") {
+    getManualTeams();
+    renderTeamResult();
+    db.ref("teams").set(teams);
+    return;
+  }
+
+  const tiers = getTierPlayers();
+
+  if (mode === "balance") {
+    tiers.forEach(tier => {
+      const shuffled = shuffle(tier);
+
+      shuffled.forEach((name, i) => {
+        const teamNumber = String((i % 4) + 1);
+
+       const TEAM_SIZE = getTeamSize();
+
+if (teams[teamNumber].length < TEAM_SIZE){
           teams[teamNumber].push(name);
         }
       });
@@ -864,6 +925,12 @@ function resetGame() {
 function setLockMode(team, checked) {
   lockMode[team] = checked;
 }
+
+
+function getTeamSize() {
+  return Number(document.getElementById("teamSize").value);
+}
+
 
 board = initBoard();
 changeMode();
