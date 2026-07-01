@@ -550,29 +550,35 @@ function makeTeams(checkBox) {
 
   const tiers = getTierPlayers();
 
-  if (mode === "balance") {
-    tiers.forEach(tier => {
-      const shuffled = shuffle(tier);
+const playerCount = tiers.flat().length;
+const activeTeamCount = Math.min(TEAM_COUNT, Math.ceil(playerCount / TEAM_SIZE));
+const activeTeamIds = TEAM_IDS.slice(0, activeTeamCount);
 
-      shuffled.forEach((name, i) => {
-        const teamNumber = TEAM_IDS[i % TEAM_COUNT];
+if (mode === "balance") {
+  tiers.forEach(tier => {
+    const shuffled = shuffle(tier);
 
-        if (teams[teamNumber].length < TEAM_SIZE) {
-          teams[teamNumber].push(name);
-        }
-      });
-    });
-  } else {
-    const allPlayers = shuffle(tiers.flat());
-
-    allPlayers.forEach(name => {
-      const target = TEAM_IDS.find(t => teams[t].length < TEAM_SIZE);
+    shuffled.forEach(name => {
+      const target = activeTeamIds
+        .filter(t => teams[t].length < TEAM_SIZE)
+        .sort((a, b) => teams[a].length - teams[b].length)[0];
 
       if (target) {
         teams[target].push(name);
       }
     });
-  }
+  });
+} else {
+  const allPlayers = shuffle(tiers.flat());
+
+  allPlayers.forEach(name => {
+    const target = activeTeamIds.find(t => teams[t].length < TEAM_SIZE);
+
+    if (target) {
+      teams[target].push(name);
+    }
+  });
+}
 
   renderTeamResult();
   db.ref("teams").set(teams);
