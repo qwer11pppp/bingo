@@ -30,7 +30,8 @@ body {
 }
 
 canvas {
-  border-radius: 12px;
+  border-radius: px;
+  margin-top: 60px;
   border: 2px solid #2a2f4a;
   background: #0f1117;
 }
@@ -65,7 +66,7 @@ select {
 }
 
 #teamSetup {
-  width: 720px;
+  width: 760px;
   color: black;
 }
 
@@ -131,7 +132,7 @@ select {
 }
 
 .manualBox input {
-  width: 145px;
+  width: 130px;
   margin: 4px;
   background: #f2f2f2;
   color: black;
@@ -158,7 +159,7 @@ select {
 }
 
 #score {
-  width: 330px;
+  width: 360px;
   background: rgba(20, 24, 35, 0.95);
   padding: 15px;
   border-radius: 12px;
@@ -260,14 +261,15 @@ select {
         <th>초기화</th>
         <td><input type="checkbox" onclick="clearTeamTable(this)"></td>
       </tr>
+
       <tr>
         <th>팀 인원수</th>
-<td>
-  <select id="teamSize">
-    <option value="3">3명</option>
-    <option value="4" selected>4명</option>
-  </select>
-</td>
+        <td>
+          <select id="teamSize">
+            <option value="3">3명</option>
+            <option value="4" selected>4명</option>
+          </select>
+        </td>
         <th>팀짜기</th>
         <td><input type="checkbox" onclick="makeTeams(this)"></td>
       </tr>
@@ -315,11 +317,17 @@ select {
       <input id="m42" placeholder="4팀 2번">
       <input id="m43" placeholder="4팀 3번">
       <input id="m44" placeholder="4팀 4번">
+
+      <h3>💛 5팀 직접 입력</h3>
+      <input id="m51" placeholder="5팀 1번">
+      <input id="m52" placeholder="5팀 2번">
+      <input id="m53" placeholder="5팀 3번">
+      <input id="m54" placeholder="5팀 4번">
     </div>
 
     <div id="teamResult"></div>
 
-    <button class="startBtn" onclick="startGame()">게임스타트</button>
+    <button class="startBtn" onclick="startGame()">게임 스타트</button>
 
   </div>
 
@@ -330,6 +338,7 @@ select {
       <button style="background:#4d96ff;color:white;" onclick="setTeam('2')">2팀</button>
       <button style="background:#4caf70;color:white;" onclick="setTeam('3')">3팀</button>
       <button style="background:#c7a6ff;color:white;" onclick="setTeam('4')">4팀</button>
+      <button style="background:#ffd93d;color:black;" onclick="setTeam('5')">5팀</button>
 
       <button style="background:#666;color:white;" onclick="undo()">되돌리기</button>
       <button style="background:#333;color:white;" onclick="resetGame()">초기화</button>
@@ -337,7 +346,7 @@ select {
 
     <div style="color:white;font-weight:bold;">
       🎯 목표 빙고:
-      <input id="targetBingo" type="number" value="3" style="width:70px;">
+      <input id="targetBingo" type="number" value="3" style="width:70px;"margin-top: "18px;">
     </div>
 
     <canvas id="game" width="700" height="700"></canvas>
@@ -346,6 +355,7 @@ select {
 </div>
 
 <div id="score" class="hidden"></div>
+
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -370,41 +380,62 @@ const ctx = canvas.getContext("2d");
 const SIZE = 10;
 const CELL = 70;
 
+// 여기 숫자를 5로 바꾸면 5팀까지 사용 가능
+const TEAM_COUNT = 5;
+
+const TEAM_IDS = Array.from({ length: TEAM_COUNT }, (_, i) => String(i + 1));
+
 const colors = {
   "1": "#ff5c7a",
   "2": "#4d96ff",
   "3": "#4caf70",
   "4": "#c7a6ff",
+  "5": "#c9b216",
   "0": "#151823"
+};
+
+const emojis = {
+  "1": "💗",
+  "2": "💙",
+  "3": "💚",
+  "4": "💜",
+  "5": "💛"
 };
 
 let currentTeam = "1";
 let board = [];
-let score = {1:0,2:0,3:0,4:0};
-let bingoScore = {1:0,2:0,3:0,4:0};
+let score = makeTeamObject(0);
+let bingoScore = makeTeamObject(0);
 let targetBingo = 3;
 let history = [];
 
-let teams = {
-  "1": [],
-  "2": [],
-  "3": [],
-  "4": []
-};
+let teams = makeTeamObject([]);
+let chickenScores = makeChickenObject();
+let lockMode = makeTeamObject(false);
 
-let chickenScores = {
-  "1": Array(10).fill(""),
-  "2": Array(10).fill(""),
-  "3": Array(10).fill(""),
-  "4": Array(10).fill("")
-};
+function makeTeamObject(value) {
+  const obj = {};
 
-let lockMode = {
-  "1": false,
-  "2": false,
-  "3": false,
-  "4": false
-};
+  TEAM_IDS.forEach(id => {
+    obj[id] = Array.isArray(value) ? [] : value;
+  });
+
+  return obj;
+}
+
+function makeChickenObject() {
+  const obj = {};
+
+  TEAM_IDS.forEach(id => {
+    obj[id] = Array(10).fill("");
+  });
+
+  return obj;
+}
+
+function getTeamSize() {
+  return Number(document.getElementById("teamSize").value);
+}
 
 function initBoard() {
   return Array.from({ length: SIZE }, (_, y) =>
@@ -432,10 +463,10 @@ function changeMode() {
 }
 
 function clearCaptainSlots() {
-  m11.value = "";
-  m21.value = "";
-  m31.value = "";
-  m41.value = "";
+  TEAM_IDS.forEach(team => {
+    const input = document.getElementById(`m${team}1`);
+    if (input) input.value = "";
+  });
 }
 
 function autoPickCaptainsByPlayerCount() {
@@ -444,11 +475,8 @@ function autoPickCaptainsByPlayerCount() {
   const tiers = getTierPlayers();
   const playerCount = tiers.flat().length;
   const teamSize = getTeamSize();
+  const teamCount = Math.min(TEAM_COUNT, Math.ceil(playerCount / teamSize));
 
-const teamCount =
-  Math.ceil(playerCount / teamSize);
-
-  // 필요한 팀장 수만큼 인원이 되는 티어만 후보로 고름
   const possibleTiers = tiers.filter(tier => tier.length >= teamCount);
 
   if (possibleTiers.length === 0) {
@@ -456,16 +484,13 @@ const teamCount =
     return;
   }
 
-  // 가능한 티어 중 하나를 랜덤 선택
   const selectedTier = shuffle(possibleTiers)[0];
-
-  // 선택된 티어에서 팀장 랜덤 선발
   const captains = shuffle(selectedTier).slice(0, teamCount);
 
-  if (teamCount >= 1) m11.value = captains[0] || "";
-  if (teamCount >= 2) m21.value = captains[1] || "";
-  if (teamCount >= 3) m31.value = captains[2] || "";
-  if (teamCount >= 4) m41.value = captains[3] || "";
+  for (let i = 0; i < teamCount; i++) {
+    const input = document.getElementById(`m${i + 1}1`);
+    if (input) input.value = captains[i] || "";
+  }
 }
 
 function getTierPlayers() {
@@ -477,7 +502,8 @@ function getTierPlayers() {
 
     cells.forEach((cell, index) => {
       const name = cell.innerText.trim();
-      if (name !== "") {
+
+      if (name !== "" && tiers[index]) {
         tiers[index].push(name);
       }
     });
@@ -491,13 +517,19 @@ function shuffle(arr) {
 }
 
 function getManualTeams() {
-  teams = {
-    "1": [m11.value, m12.value, m13.value, m14.value].map(v => v.trim()).filter(Boolean),
-    "2": [m21.value, m22.value, m23.value, m24.value].map(v => v.trim()).filter(Boolean),
-    "3": [m31.value, m32.value, m33.value, m34.value].map(v => v.trim()).filter(Boolean),
-    "4": [m41.value, m42.value, m43.value, m44.value].map(v => v.trim()).filter(Boolean)
-  };
+  teams = makeTeamObject([]);
+
+  TEAM_IDS.forEach(team => {
+    for (let i = 1; i <= getTeamSize(); i++) {
+      const input = document.getElementById(`m${team}${i}`);
+
+      if (input && input.value.trim() !== "") {
+        teams[team].push(input.value.trim());
+      }
+    }
+  });
 }
+
 function makeTeams(checkBox) {
   const TEAM_SIZE = getTeamSize();
 
@@ -507,12 +539,7 @@ function makeTeams(checkBox) {
 
   const mode = document.getElementById("teamMode").value;
 
-  teams = {
-    "1": [],
-    "2": [],
-    "3": [],
-    "4": []
-  };
+  teams = makeTeamObject([]);
 
   if (mode === "manual") {
     getManualTeams();
@@ -528,7 +555,7 @@ function makeTeams(checkBox) {
       const shuffled = shuffle(tier);
 
       shuffled.forEach((name, i) => {
-        const teamNumber = String((i % 4) + 1);
+        const teamNumber = TEAM_IDS[i % TEAM_COUNT];
 
         if (teams[teamNumber].length < TEAM_SIZE) {
           teams[teamNumber].push(name);
@@ -539,61 +566,11 @@ function makeTeams(checkBox) {
     const allPlayers = shuffle(tiers.flat());
 
     allPlayers.forEach(name => {
-      let target = ["1","2","3","4"].find(t => teams[t].length < TEAM_SIZE);
-      if (target) teams[target].push(name);
-    });
-  }
+      const target = TEAM_IDS.find(t => teams[t].length < TEAM_SIZE);
 
-  renderTeamResult();
-  db.ref("teams").set(teams);
-}
-
-function makeTeams(checkBox) {
-
-const TEAM_SIZE = getTeamSize(); 
-
- if (checkBox) {
-    setTimeout(() => checkBox.checked = false, 300);
-  }
-
-  const mode = document.getElementById("teamMode").value;
-
-  teams = {
-    "1": [],
-    "2": [],
-    "3": [],
-    "4": []
-  };
-
-  if (mode === "manual") {
-    getManualTeams();
-    renderTeamResult();
-    db.ref("teams").set(teams);
-    return;
-  }
-
-  const tiers = getTierPlayers();
-
-  if (mode === "balance") {
-    tiers.forEach(tier => {
-      const shuffled = shuffle(tier);
-
-      shuffled.forEach((name, i) => {
-        const teamNumber = String((i % 4) + 1);
-
-       const TEAM_SIZE = getTeamSize();
-
-if (teams[teamNumber].length < TEAM_SIZE){
-          teams[teamNumber].push(name);
-        }
-      });
-    });
-  } else {
-    const allPlayers = shuffle(tiers.flat());
-
-    allPlayers.forEach(name => {
-      let target = ["1","2","3","4"].find(t => teams[t].length < TEAM_SIZE);
-      if (target) teams[target].push(name);
+      if (target) {
+        teams[target].push(name);
+      }
     });
   }
 
@@ -602,12 +579,13 @@ if (teams[teamNumber].length < TEAM_SIZE){
 }
 
 function renderTeamResult() {
-  document.getElementById("teamResult").innerHTML = `
-    💗 1팀: ${teams["1"].join(", ") || "없음"}<br>
-    💙 2팀: ${teams["2"].join(", ") || "없음"}<br>
-    💚 3팀: ${teams["3"].join(", ") || "없음"}<br>
-    💜 4팀: ${teams["4"].join(", ") || "없음"}
-  `;
+  let html = "";
+
+  TEAM_IDS.forEach(team => {
+    html += `${emojis[team]} ${team}팀: ${teams[team]?.join(", ") || "없음"}<br>`;
+  });
+
+  document.getElementById("teamResult").innerHTML = html;
 }
 
 function clearTeamTable(checkBox) {
@@ -623,12 +601,7 @@ function clearTeamTable(checkBox) {
     input.value = "";
   });
 
-  teams = {
-    "1": [],
-    "2": [],
-    "3": [],
-    "4": []
-  };
+  teams = makeTeamObject([]);
 
   document.getElementById("teamResult").innerHTML = "";
   db.ref("teams").set(teams);
@@ -656,38 +629,14 @@ db.ref("gameStarted").on("value", snap => {
 });
 
 db.ref("teams").on("value", snap => {
-  teams = snap.val() || teams;
+  teams = snap.val() || makeTeamObject([]);
   renderTeamResult();
   renderScore();
 });
 
 db.ref("chicken").on("value", snap => {
-  chickenScores = snap.val() || chickenScores;
+  chickenScores = snap.val() || makeChickenObject();
   renderScore();
-});
-
-canvas.addEventListener("click", (e) => {
-  const x = Math.floor(e.offsetX / CELL);
-  const y = Math.floor(e.offsetY / CELL);
-
-  if (!board[y] || !board[y][x]) return;
-
-  const cell = board[y][x];
-
-  if (cell.locked) return;
-
-  history.push(JSON.stringify(board));
-  if (history.length > 30) history.shift();
-
-  if (lockMode[currentTeam]) {
-    cell.owner = currentTeam;
-    cell.locked = true;
-  } else {
-    cell.owner = (cell.owner === currentTeam) ? "0" : currentTeam;
-    cell.locked = false;
-  }
-
-  db.ref("board").set(board);
 });
 
 db.ref("board").on("value", snap => {
@@ -708,19 +657,46 @@ document.getElementById("targetBingo").addEventListener("input", e => {
   db.ref("targetBingo").set(v);
 });
 
+canvas.addEventListener("click", e => {
+  const x = Math.floor(e.offsetX / CELL);
+  const y = Math.floor(e.offsetY / CELL);
+
+  if (!board[y] || !board[y][x]) return;
+
+  const cell = board[y][x];
+
+  if (cell.locked) return;
+
+  history.push(JSON.stringify(board));
+  if (history.length > 30) history.shift();
+
+  if (lockMode[currentTeam]) {
+    cell.owner = currentTeam;
+    cell.locked = true;
+  } else {
+    cell.owner = cell.owner === currentTeam ? "0" : currentTeam;
+    cell.locked = false;
+  }
+
+  db.ref("board").set(board);
+});
+
 function updateScores() {
-  score = {1:0,2:0,3:0,4:0};
-  bingoScore = {1:0,2:0,3:0,4:0};
+  score = makeTeamObject(0);
+  bingoScore = makeTeamObject(0);
 
   for (let y = 0; y < SIZE; y++) {
     for (let x = 0; x < SIZE; x++) {
-      const o = board[y][x].owner;
-      if (o !== "0") score[o]++;
+      const owner = board[y][x].owner;
+
+      if (owner !== "0" && score[owner] !== undefined) {
+        score[owner]++;
+      }
     }
   }
 
-  ["1","2","3","4"].forEach(t => {
-    bingoScore[t] = checkBingo(t);
+  TEAM_IDS.forEach(team => {
+    bingoScore[team] = checkBingo(team);
   });
 }
 
@@ -762,7 +738,7 @@ function render() {
     for (let x = 0; x < SIZE; x++) {
       const c = board[y][x];
 
-      ctx.fillStyle = colors[c.owner];
+      ctx.fillStyle = colors[c.owner] || colors["0"];
       ctx.fillRect(x * CELL, y * CELL, CELL, CELL);
 
       ctx.strokeStyle = "#2a2f3a";
@@ -774,7 +750,6 @@ function render() {
       ctx.textBaseline = "middle";
       ctx.fillText(c.num, x * CELL + 35, y * CELL + 35);
 
-      // 🔒 고정된 칸 표시
       if (c.locked) {
         ctx.fillStyle = "#FFD700";
         ctx.font = "bold 18px Arial";
@@ -784,10 +759,13 @@ function render() {
   }
 }
 
+function teamNames(team) {
+  if (!teams[team] || teams[team].length === 0) return "멤버 없음";
+  return teams[team].join(", ");
+}
 
-function teamNames(t) {
-  if (!teams[t] || teams[t].length === 0) return "멤버 없음";
-  return teams[t].join(", ");
+function setLockMode(team, checked) {
+  lockMode[team] = checked;
 }
 
 function saveChicken(team, index, value) {
@@ -796,41 +774,35 @@ function saveChicken(team, index, value) {
 }
 
 function renderChickenInputs(team) {
-  const emoji = {
-    "1": "💗",
-    "2": "💙",
-    "3": "💚",
-    "4": "💜"
-  };
-
   let html = `
     <div class="chickenTeam">
       <div class="chickenTeamName">
-  ${emoji[team]} ${team}팀
-  <label style="font-size:11px;margin-left:6px;">
-    <input
-      type="checkbox"
-      ${lockMode[team] ? "checked" : ""}
-      onchange="setLockMode('${team}', this.checked)"
-    >
-    🔒고정
-  </label>
-</div>
+        ${emojis[team]} ${team}팀
+        <label style="font-size:11px;margin-left:6px;">
+          <input
+            type="checkbox"
+            ${lockMode[team] ? "checked" : ""}
+            onchange="setLockMode('${team}', this.checked)"
+          >
+          🔒고정
+        </label>
+      </div>
+
       <div class="chickenGrid">
   `;
 
   for (let i = 0; i < 10; i++) {
     html += `
       <input
-  type="text"
-  maxlength="3"
-  value="${chickenScores[team]?.[i] || ""}"
-  placeholder="${i + 1}"
-  onchange="
-  this.value=this.value.replace(/[^0-9]/g,'').slice(0,3);
-  saveChicken('${team}', ${i}, this.value);
-"
->
+        type="text"
+        maxlength="3"
+        value="${chickenScores[team]?.[i] || ""}"
+        placeholder="${i + 1}"
+        onchange="
+          this.value=this.value.replace(/[^0-9]/g,'').slice(0,3);
+          saveChicken('${team}', ${i}, this.value);
+        "
+      >
     `;
   }
 
@@ -845,44 +817,35 @@ function renderChickenInputs(team) {
 function renderScore() {
   let win = "";
 
-  for (let t of ["1","2","3","4"]) {
-    if (bingoScore[t] >= targetBingo) {
-      win = `<div class="win">🏆 ${t}팀 승리!</div>`;
+  TEAM_IDS.forEach(team => {
+    if (bingoScore[team] >= targetBingo) {
+      win = `<div class="win">🏆 ${team}팀 승리!</div>`;
     }
-  }
+  });
+
+  let teamHtml = "";
+
+  TEAM_IDS.forEach(team => {
+    teamHtml += `
+      <div class="team">
+        <div>${emojis[team]} ${team}팀<br><small>${teamNames(team)}</small></div>
+        <div>점령 ${score[team]} / 빙고 ${bingoScore[team]}</div>
+      </div>
+    `;
+  });
+
+  let chickenHtml = "";
+
+  TEAM_IDS.forEach(team => {
+    chickenHtml += renderChickenInputs(team);
+  });
 
   document.getElementById("score").innerHTML = `
     <div class="title">💖 SCORE BOARD 💖</div>
 
     ${win}
 
-    <div class="team">
-  <div>💗 1팀<br><small>${teamNames("1")}</small></div>
-  <div>
-    점령 ${score["1"]} / 빙고 ${bingoScore["1"]}<br>
-  </div>
-</div>
-
-<div class="team">
-  <div>💙 2팀<br><small>${teamNames("2")}</small></div>
-  <div>
-    점령 ${score["2"]} / 빙고 ${bingoScore["2"]}<br>
-  </div>
-</div>
-
-<div class="team">
-  <div>💚 3팀<br><small>${teamNames("3")}</small></div>
-  <div>
-    점령 ${score["3"]} / 빙고 ${bingoScore["3"]}<br>
-  </div>
-</div>
-
-<div class="team">
-  <div>💜 4팀<br><small>${teamNames("4")}</small></div>
-  <div>
-    점령 ${score["4"]} / 빙고 ${bingoScore["4"]}<br>
-  </div>
-</div>
+    ${teamHtml}
 
     <div style="text-align:center;margin-top:10px;opacity:0.8;">
       🎯 목표 빙고: ${targetBingo}
@@ -890,11 +853,7 @@ function renderScore() {
 
     <div class="chickenBox">
       <div class="chickenTitle">🍗 치킨</div>
-
-      ${renderChickenInputs("1")}
-      ${renderChickenInputs("2")}
-      ${renderChickenInputs("3")}
-      ${renderChickenInputs("4")}
+      ${chickenHtml}
     </div>
   `;
 }
@@ -910,31 +869,14 @@ function resetGame() {
   board = initBoard();
   history = [];
 
-  chickenScores = {
-    "1": Array(10).fill(""),
-    "2": Array(10).fill(""),
-    "3": Array(10).fill(""),
-    "4": Array(10).fill("")
-  };
+  chickenScores = makeChickenObject();
+  lockMode = makeTeamObject(false);
 
   db.ref("board").set(board);
   db.ref("chicken").set(chickenScores);
   db.ref("gameStarted").set(false);
 }
 
-function setLockMode(team, checked) {
-  lockMode[team] = checked;
-}
-
-
-function getTeamSize() {
-  return Number(document.getElementById("teamSize").value);
-}
-
-
 board = initBoard();
 changeMode();
 </script>
-
-</body>
-</html>
