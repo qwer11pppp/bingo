@@ -418,7 +418,47 @@ function setTeam(t) {
 
 function changeMode() {
   const mode = document.getElementById("teamMode").value;
-  document.getElementById("manualTeams").classList.toggle("hidden", mode !== "manual");
+  const manualBox = document.getElementById("manualTeams");
+
+  manualBox.classList.toggle("hidden", mode !== "manual");
+
+  if (mode === "manual") {
+    autoPickCaptainsByPlayerCount();
+  }
+}
+
+function clearCaptainSlots() {
+  m11.value = "";
+  m21.value = "";
+  m31.value = "";
+  m41.value = "";
+}
+
+function autoPickCaptainsByPlayerCount() {
+  clearCaptainSlots();
+
+  const tiers = getTierPlayers();
+  const playerCount = tiers.flat().length;
+  const teamCount = Math.ceil(playerCount / TEAM_SIZE);
+
+  // 필요한 팀장 수만큼 인원이 되는 티어만 후보로 고름
+  const possibleTiers = tiers.filter(tier => tier.length >= teamCount);
+
+  if (possibleTiers.length === 0) {
+    alert("팀장으로 뽑을 수 있는 티어 인원이 부족해.");
+    return;
+  }
+
+  // 가능한 티어 중 하나를 랜덤 선택
+  const selectedTier = shuffle(possibleTiers)[0];
+
+  // 선택된 티어에서 팀장 랜덤 선발
+  const captains = shuffle(selectedTier).slice(0, teamCount);
+
+  if (teamCount >= 1) m11.value = captains[0] || "";
+  if (teamCount >= 2) m21.value = captains[1] || "";
+  if (teamCount >= 3) m31.value = captains[2] || "";
+  if (teamCount >= 4) m41.value = captains[3] || "";
 }
 
 function getTierPlayers() {
